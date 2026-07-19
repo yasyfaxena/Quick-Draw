@@ -1,0 +1,1113 @@
+room.html :
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        background-image: url("bgg1.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        padding: 10px;
+        align-items: center;
+      }
+
+      .header {
+        display: flex;
+        width: 100%;
+        max-width: 1000px;
+        justify-content: center;
+        padding: 20px;
+        margin-bottom: 0;
+      }
+
+      .logo img {
+        width: 300px;
+        height: auto;
+        object-fit: contain;
+      }
+
+      .game-wrapper {
+        background-color: #00346453;
+        border-radius: 8px;
+        display: flex;
+        gap: 20px;
+        max-width: 1000px;
+        width: 100%;
+        padding: 20px;
+        height: calc(100vh - 100px);
+        justify-content: center;
+      }
+
+      .sidebar {
+        background: #72aff9;
+        border-radius: 10px;
+        margin: 0;
+        margin-top: 43px;
+        width: 200px;
+        padding: 20px;
+        flex-shrink: 0;
+        height: fit-content;
+      }
+
+      .player-list {
+        list-style: none;
+      }
+
+      .player-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .player-avatar {
+        width: 35px;
+        height: 35px;
+        background: #fefefe;
+        border-radius: 50%;
+        margin-right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .player-info {
+        flex-grow: 1;
+      }
+
+      .player-name {
+        font-weight: bold;
+        color: #333;
+        font-size: 0.9em;
+      }
+
+      .player-points {
+        color: #666;
+        font-size: 0.8em;
+      }
+
+      .main-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .room-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .room-controls button {
+        background: #95c3fc;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 6px 6px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .controls-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 50px;
+        margin-bottom: 10px;
+      }
+
+      .drawing-tools {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .drawing-tools button,
+      .drawing-tools input[type="color"],
+      .room-controls button {
+        background: #95c3fc;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .drawing-tools input[type="color"] {
+        width: 28px;
+        height: 28px;
+        padding: 2px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #95c3fc;
+      }
+
+      .drawing-tools button {
+        width: 28px;
+      }
+
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 340px;
+        width: 600px;
+        cursor: crosshair;
+        touch-action: none;
+      }
+
+      .canvas-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        border-radius: 10px;
+      }
+
+      #gameOverModal .modal-content {
+        text-align: center;
+        max-width: 400px;
+      }
+
+      #winnerInfo {
+        margin: 20px 0;
+      }
+
+      .start-game-btn {
+        background-color: #95c3fc;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 40px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        margin-left: 80px;
+      }
+
+      .start-game-btn:hover {
+        background-color: #d7d7d7;
+      }
+
+      .canvas-area {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #drawingArea {
+        position: relative;
+        cursor: crosshair;
+        width: 600px;
+        height: 300px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+      }
+
+      .answer-section {
+        background: white;
+        border-radius: 10px;
+        padding: 12px;
+        height: 180px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .status-text {
+        color: #666;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+      }
+
+      .answer-input {
+        width: 100%;
+        padding: 8px;
+        border: 2px solid #eee;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      #answerList {
+        flex: 1;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        padding: 8px;
+        margin-top: 8px;
+        max-height: 80px;
+      }
+
+      .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+      }
+
+      .modal-content {
+        background-color: #f9f9f9;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 40%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1001;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+      #infoModal .modal-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: auto;
+      }
+      #leaveModal .modal-content {
+        height: auto;
+        justify-content: space-between;
+        padding-bottom: 20px;
+      }
+      .modal-content h2 {
+        margin: 0;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .modal-content p {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 10px;
+        flex-grow: 1;
+      }
+
+      #infoModal .modal-content button {
+        align-self: center;
+      }
+
+      .modal-content button {
+        background-color: #72aff9;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+        max-width: 200px;
+        margin: 5px auto;
+      }
+      #leaveModal .modal-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        height: auto;
+      }
+
+      #leaveModal .modal-content button {
+        margin-top: 20px;
+        align-self: center;
+        width: auto;
+        margin-right: 10px;
+      }
+
+      .modal-content button:hover {
+        background-color: #0056b3;
+      }
+      .object-selection-modal {
+        position: absolute;
+        z-index: 1000;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        width: 80%;
+        max-width: 500px;
+        align-items: center;
+      }
+
+      .object-selection-modal h2 {
+        margin-bottom: 15px;
+        text-align: center;
+        color: #333;
+      }
+
+      .object-selection-modal p {
+        margin-bottom: 20px;
+        text-align: center;
+        color: #666;
+      }
+
+      #objectOptions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .object-btn {
+        background-color: #72aff9;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 12px 15px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+        width: 100%;
+      }
+
+      .object-btn:hover {
+        background-color: #0056b3;
+      }
+      .timer-container {
+        background-color: #95c3fc;
+        padding: 6px 15px;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      #timer {
+        font-weight: bold;
+        color: white;
+        font-size: 16px;
+      }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          <img src="logoCut.png" alt="Logo" />
+        </div>
+      </div>
+
+      <div class="game-wrapper">
+        <div class="sidebar">
+          <ul class="player-list" id="playersList"></ul>
+        </div>
+
+        <div class="main-content">
+          <div class="controls-container">
+            <div class="drawing-tools">
+              <button id="eraserButton" title="Eraser">🧽</button>
+              <input
+                type="color"
+                id="colorPicker"
+                title="Choose Color"
+                value="#000000"
+              />
+            </div>
+            <div id="timerContainer" class="timer-container">
+              <span id="timer">00:00</span>
+            </div>
+            <div class="room-controls">
+              <button id="infoButton">
+                <i class="fas fa-circle-info"></i>
+              </button>
+              <button id="leaveButton">
+                <i class="fas fa-door-open"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="canvas-area">
+            <div id="drawingArea"></div>
+            <div id="canvasOverlay" class="canvas-overlay">
+              <img
+                src="waiting.png"
+                alt="Waiting"
+                style="width: 150px; margin-bottom: 10px"
+              />
+              <h3>WAITING</h3>
+              <div id="hostMessage" style="display: none">
+                <p>Other players are waiting for you to start</p>
+                <button id="startGameBtn" class="start-game-btn">START</button>
+              </div>
+              <div id="playerMessage" style="display: none">
+                <p>Waiting for the room owner to start</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="answer-section">
+            <div class="status-text" id="statusText">
+              Waiting for players...
+            </div>
+            <input
+              type="text"
+              class="answer-input"
+              placeholder="Type your answer here..."
+              id="answerInput"
+            />
+            <div id="answerFeedback"></div>
+            <div id="answerList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+      <div class="modal-content">
+        <h2>Game Information</h2>
+        <p>Room Code: <span id="roomCode">No room code</span></p>
+        <p>Theme: <span id="themeInfo">No theme chosen</span></p>
+        <p>
+          Points to Win:
+          <span id="pointsInfo">No points selected</span>
+        </p>
+        <p>
+          Maximum Player:
+          <span id="maxPlayer">No number of players selected</span>
+        </p>
+        <button onclick="closeModal('infoModal')">Close</button>
+      </div>
+    </div>
+
+    <div id="leaveModal" class="modal">
+      <div class="modal-content">
+        <p>Are you sure you want to leave the room?</p>
+        <button onclick="leaveRoom()">Leave</button>
+        <button onclick="closeModal('leaveModal')">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      const socket = io({
+        auth: {
+          avatar: localStorage.getItem("avatar") || "👤",
+        },
+      });
+      const username = localStorage.getItem("username");
+      const roomId = localStorage.getItem("roomId");
+      const infoButton = document.getElementById("infoButton");
+      const leaveButton = document.getElementById("leaveButton");
+
+      function showModal(modalId) {
+        document.getElementById(modalId).style.display = "block";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      function leaveRoom() {
+        localStorage.removeItem("isHost");
+        window.location.href = "/";
+      }
+
+      const themeObjects = {
+        general: [
+          "Arduino",
+          "Parfume",
+          "Scissors",
+          "Printer",
+          "Gas Cylinder ",
+          "Tree",
+        ],
+        animal: ["Cat", "Monkey", "Rabbit", "Lion", "Duck", "Giraffe"],
+        object: ["Table", "Bed", "Hat", "Calculator", "Iron", "Bag"],
+        food: ["Mie", "Pizza", "Burger", "Ice Cream", "Bread", "Sushi"],
+        hardware: [
+          "Computer",
+          "Mouse",
+          "Keyboard",
+          "Tablet",
+          "Printer",
+          "Router",
+        ],
+      };
+
+      let timerInterval;
+      const timerElement = document.getElementById('timer');
+
+      function startTimer(duration, onComplete) {
+        clearInterval(timerInterval);
+        let timeRemaining = duration;
+        
+        function updateTimerDisplay() {
+          const minutes = Math.floor(timeRemaining / 60);
+          const seconds = timeRemaining % 60;
+          timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        updateTimerDisplay();
+        
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          updateTimerDisplay();
+          
+          if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            if (onComplete) onComplete();
+          }
+        }, 1000);
+      }
+      function startDrawingTimer() {
+      let timeLeft = 120; // 2 menit dalam detik
+      const timerElement = document.getElementById('timer');
+    
+      clearInterval(timerInterval); // Clear any existing timer
+      
+      timerInterval = setInterval(() => {
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          timeLeft--;
+          
+          if (timeLeft < 0) {
+              clearInterval(timerInterval);
+              socket.emit("timeUp", {
+                  roomId: localStorage.getItem("roomCode")
+              });
+          }
+      }, 1000);
+  }
+
+  function startObjectSelection(theme, callback) {
+    const objects = themeObjects[theme] || [];
+    if (!objects.length) {
+        console.error("Tema tidak valid atau tidak memiliki objek.");
+        return;
+    }
+
+    const objectModal = document.createElement("div");
+    objectModal.className = "object-selection-modal";
+    objectModal.innerHTML = `
+        <h2>Select Objects to Draw</h2>
+        <p>Time remaining: <span id="selectionTimer">10</span> seconds</p>
+        <div id="objectOptions">
+            ${objects.map(obj => `
+                <button class="object-btn">${obj}</button>
+            `).join("")}
+        </div>
+    `;
+
+    document.body.appendChild(objectModal);
+    const canvas = document.querySelector("canvas");
+    const canvasRect = canvas.getBoundingClientRect();
+
+    objectModal.style.position = "absolute";
+    objectModal.style.left = `${canvasRect.left + canvasRect.width / 2}px`;
+    objectModal.style.top = `${canvasRect.top + canvasRect.height / 2}px`;
+    objectModal.style.transform = "translate(-50%, -50%)";
+    objectModal.style.zIndex = "1000";
+    
+    let timeLeft = 10;
+    let isObjectSelected = false;
+    const timerElement = objectModal.querySelector("#selectionTimer");
+    
+    const selectionTimer = setInterval(() => {
+        timeLeft--;
+        if (timerElement) {
+            timerElement.textContent = timeLeft;
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(selectionTimer);
+            if (!isObjectSelected && objectModal.parentNode) {
+                document.body.removeChild(objectModal);
+                socket.emit("timeUp", {
+                    roomId: localStorage.getItem("roomCode")
+                });
+                document.getElementById("statusText").textContent = "You missed your turn.";
+            }
+        }
+    }, 1000);
+
+    const buttons = objectModal.querySelectorAll(".object-btn");
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            if (isObjectSelected) return;
+            isObjectSelected = true;
+            clearInterval(selectionTimer);
+            const selectedObject = button.textContent;
+            document.body.removeChild(objectModal);
+            callback(selectedObject);
+            startDrawingTimer();
+        });
+    });
+}
+socket.on("playerTurn", ({ player, theme }) => {
+    const answerList = document.getElementById("answerList");
+    answerList.innerHTML = "";
+    
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    isMyTurn = player === localStorage.getItem("username");
+    updateCanvasState();
+
+    if (isMyTurn) {
+        startObjectSelection(theme, (selectedObject) => {
+            if (selectedObject) {
+                socket.emit("objectSelected", {
+                    object: selectedObject,
+                    roomId: localStorage.getItem("roomCode")
+                });
+            }
+        });
+    } else {
+        document.getElementById("statusText").textContent = `${player} is choosing...`;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+});
+
+      if (roomId) {
+        const roomCode = localStorage.getItem("roomCode");
+        socket.emit("join", username, roomCode);
+        const avatar = localStorage.getItem("avatar") || "👤";
+        socket.auth = { avatar };
+      }
+
+      infoButton.addEventListener("click", () => {
+        const roomCode = localStorage.getItem("roomCode");
+        console.log("Info button clicked, room code:", roomCode);
+        if (roomCode) {
+          socket.emit("get room info", roomCode);
+          showModal("infoModal");
+        }
+      });
+
+      socket.on("room info", (roomInfo) => {
+        console.log("Received room info:", roomInfo);
+        if (roomInfo) {
+          document.getElementById("roomCode").textContent = roomInfo.kode_room;
+          document.getElementById("themeInfo").textContent = roomInfo.tema;
+          document.getElementById("pointsInfo").textContent = roomInfo.poin;
+          document.getElementById("maxPlayer").textContent =
+            roomInfo.jumlah_pemain;
+        }
+      });
+
+      leaveButton.addEventListener("click", () => {
+        showModal("leaveModal");
+      });
+
+      socket.on("roomData", (data) => {
+        console.log("Received room data:", data);
+        const playerList = document.getElementById("playersList");
+
+        if (!data.players || !Array.isArray(data.players)) {
+          console.error("Invalid players data received:", data.players);
+          return;
+        }
+
+        playerList.innerHTML = "";
+
+        data.players.forEach((player) => {
+          console.log("Rendering player:", player);
+          const playerItem = document.createElement("li");
+          playerItem.className = "player-item";
+
+          const avatar = player.avatar || "👤";
+          const username = player.username || "Unknown";
+          const score = player.score || 0;
+
+          playerItem.innerHTML = `
+                  <div class="player-avatar">${avatar}</div>
+                  <div class="player-info">
+                      <div class="player-name">${username}</div>
+                      <div class="player-points">${score} points</div>
+                  </div>
+              `;
+          playerList.appendChild(playerItem);
+        });
+      });
+
+      const drawingArea = document.getElementById("drawingArea");
+      const canvas = document.createElement("canvas");
+      const canvasOverlay = document.getElementById("canvasOverlay");
+      const startGameBtn = document.getElementById("startGameBtn");
+
+      canvas.width = 600;
+      canvas.height = 400;
+      drawingArea.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      let isDrawing = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function draw(e) {
+        if (!isDrawing || !isMyTurn) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineWidth = isEraserMode ? 10 : 2;
+        ctx.strokeStyle = isEraserMode ? "#FFFFFF" : currentColor;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        socket.emit("draw", {
+          roomId: localStorage.getItem("roomCode"),
+          drawData: {
+            x: x,
+            y: y,
+            lastX: lastX,
+            lastY: lastY,
+            color: ctx.strokeStyle,
+            width: ctx.lineWidth,
+          },
+        });
+
+        [lastX, lastY] = [x, y];
+      }
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mouseout", stopDrawing);
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (isDrawing) {
+          const pos = getMousePos(canvas, e);
+
+          const drawData = {
+            x: pos.x,
+            y: pos.y,
+            lastX: lastX,
+            lastY: lastY,
+            color: isEraserMode ? "#FFFFFF" : currentColor,
+            width: isEraserMode ? 10 : 2,
+          };
+
+          ctx.beginPath();
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.strokeStyle = drawData.color;
+          ctx.lineWidth = drawData.width;
+          ctx.lineCap = "round";
+          ctx.stroke();
+
+          socket.emit("draw", {
+            roomId: localStorage.getItem("roomCode"),
+            drawData: drawData,
+          });
+
+          [lastX, lastY] = [pos.x, pos.y];
+        }
+      });
+
+      socket.on("draw", (drawData) => {
+        ctx.beginPath();
+        ctx.moveTo(drawData.lastX, drawData.lastY);
+        ctx.lineTo(drawData.x, drawData.y);
+
+        ctx.strokeStyle = drawData.color;
+        ctx.lineWidth = drawData.width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.stroke();
+      });
+
+      function getMousePos(canvas, e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+          x:
+            (e.clientX - rect.left - rect.width / 2) * scaleX +
+            canvas.width / 2,
+          y:
+            (e.clientY - rect.top - rect.height / 2) * scaleY +
+            canvas.height / 2,
+        };
+      }
+
+      function startDrawing(e) {
+        const rect = canvas.getBoundingClientRect();
+        const pos = getMousePos(canvas, e);
+        isDrawing = true;
+        [lastX, lastY] = [pos.x, pos.y];
+      }
+      let currentObject = "";
+      socket.on("startDrawing", ({ drawer, object }) => {
+      currentObject = object;
+      isMyTurn = drawer === username;
+      updateCanvasState();
+
+      if (isMyTurn) {
+          document.getElementById("statusText").textContent = `Your turn! Draw: ${object}`;
+          document.getElementById("answerInput").disabled = true;
+      } else {
+          document.getElementById("statusText").textContent = `${drawer} is drawing...`;
+          document.getElementById("answerInput").disabled = false;
+      }
+  });
+
+    // Add new socket event for handling time up
+    socket.on("timeUp", ({ nextPlayer }) => {
+      clearInterval(timerInterval);
+      if (nextPlayer) {
+        isMyTurn = nextPlayer === username;
+        updateCanvasState();
+      }
+    });
+      function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+      }
+
+      const colorPicker = document.getElementById("colorPicker");
+      const eraserButton = document.getElementById("eraserButton");
+      let isEraserMode = false;
+      let currentColor = "#000000";
+
+      colorPicker.addEventListener("input", (e) => {
+        currentColor = e.target.value;
+        isEraserMode = false;
+      });
+
+      eraserButton.addEventListener("click", () => {
+        isEraserMode = true;
+      });
+
+      let gameInProgress = false;
+      window.addEventListener("DOMContentLoaded", async () => {
+      const avatar = localStorage.getItem("avatar") || "👤";
+      socket.auth = { avatar };
+      const username = localStorage.getItem("username");
+      const roomCode = localStorage.getItem("roomCode");
+      const isHost = localStorage.getItem("isHost") === "true";
+      const hostMessage = document.getElementById("hostMessage");
+      const playerMessage = document.getElementById("playerMessage");
+      const canvasOverlay = document.getElementById("canvasOverlay");
+
+      console.log("Current roomCode:", roomCode);
+      console.log("Is host:", isHost);
+
+      // Check game status when joining
+      socket.emit("check game status", roomCode);
+
+      socket.on("game status", (status) => {
+        gameInProgress = status.inProgress;
+        
+        if (gameInProgress) {
+          canvasOverlay.style.display = "none";
+        } else {
+          canvasOverlay.style.display = "flex";
+          if (isHost) {
+            hostMessage.style.display = "block";
+            playerMessage.style.display = "none";
+          } else {
+            hostMessage.style.display = "none";
+            playerMessage.style.display = "block";
+          }
+        }
+      });
+    });
+
+    startGameBtn.addEventListener("click", () => {
+      const roomCode = localStorage.getItem("roomCode");
+      gameInProgress = true;
+      socket.emit("start game", roomCode);
+      canvasOverlay.style.display = "none";
+    });
+
+    socket.on("game started", (data) => {
+      gameInProgress = true;
+      const canvasOverlay = document.getElementById("canvasOverlay");
+      if (canvasOverlay) {
+        canvasOverlay.style.display = "none";
+      }
+      const drawingArea = document.getElementById("drawingArea");
+      drawingArea.style.display = "block";
+      isMyTurn = data.firstDrawer === username;
+      updateCanvasState();
+    });
+
+      let isMyTurn = false;
+      function updateCanvasState() {
+        if (!isMyTurn) {
+          canvas.style.pointerEvents = "none";
+          isEraserMode = false;
+          currentColor = "#000000";
+          colorPicker.disabled = true;
+          eraserButton.disabled = true;
+        } else {
+          canvas.style.pointerEvents = "auto";
+          colorPicker.disabled = false;
+          eraserButton.disabled = false;
+        }
+      }
+
+      socket.on("gameOver", ({ winner, finalScores }) => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isMyTurn = false;
+        updateCanvasState();
+        document.getElementById("answerInput").disabled = true;
+        createGameOverModal();
+
+        const winnerInfo = document.getElementById("winnerInfo");
+        const finalScoresDiv = document.getElementById("finalScores");
+
+        winnerInfo.innerHTML = `<p style="font-size: 1.2em; color: #4CAF50; margin: 20px 0;">
+              Congrats! <strong>${winner}</strong> win the game!</p>`;
+
+        if (finalScores) {
+          const scoresHTML = finalScores
+            .sort((a, b) => b.score - a.score)
+            .map(
+              (player) => `
+                      <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                          <span>${player.username}</span>
+                          <span>${player.score} points</span>
+                      </div>
+                  `
+            )
+            .join("");
+
+          finalScoresDiv.innerHTML = `
+                  <div style="margin: 20px 0;">
+                      <h3 style="margin-bottom: 10px;">Final Scores:</h3>
+                      ${scoresHTML}
+                  </div>
+              `;
+        }
+      });
+
+      function createGameOverModal() {
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.id = "gameOverModal";
+        modal.style.display = "block";
+
+        modal.innerHTML = `
+              <div class="modal-content">
+                  <h2>Game Selesai!</h2>
+                  <div id="winnerInfo"></div>
+                  <div id="finalScores"></div>
+                  <button onclick="returnToHome()" class="start-game-btn" style="margin-top: 20px;">Return to Main Menu</button>
+              </div>
+          `;
+
+        document.body.appendChild(modal);
+      }
+
+      function returnToHome() {
+        window.location.href = "/";
+      }
+
+      socket.on("newGuess", ({ username, message, isCorrect }) => {
+        const answerList = document.getElementById("answerList");
+        const guessElement = document.createElement("div");
+
+        guessElement.style.marginBottom = "4px";
+
+        if (isCorrect) {
+          guessElement.style.color = "#008000";
+          guessElement.innerHTML = `<strong>${message}</strong>`;
+        } else {
+          guessElement.style.color = "#FF0000";
+          guessElement.innerHTML = `<strong style="color : black;">${username}</strong>: ${message}`;
+        }
+
+        answerList.appendChild(guessElement);
+        answerList.scrollTop = answerList.scrollHeight;
+      });
+
+      answerInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && this.value.trim() !== "") {
+          const answer = this.value.trim().toLowerCase();
+          socket.emit("guess", {
+            answer,
+            roomId: localStorage.getItem("roomCode"),
+            username: localStorage.getItem("username"),
+          });
+          this.value = "";
+        }
+      });
+
+      socket.on("guessResult", ({ correct, drawer, nextPlayer }) => {
+        if (correct) {
+          const answerFeedback = document.getElementById("answerFeedback");
+          answerFeedback.textContent = `Jawaban benar! ${drawer} mendapatkan 5 points.`;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (nextPlayer) {
+            isMyTurn = nextPlayer === username;
+            updateCanvasState();
+          }
+        }
+      });
+
+      socket.on("room full", (message) => {
+        alert(message);
+        window.location.href = "/";
+      });
+
+      socket.on("joinError", (message) => {
+        alert(message);
+        window.location.href = "/";
+      });
+    </script>
+  </body>
+</html>
